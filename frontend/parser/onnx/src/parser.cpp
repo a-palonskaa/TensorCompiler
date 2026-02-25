@@ -1,9 +1,14 @@
 #include "parser.hpp"
-#include "onnx.pb.h"
-#include <fstream>
-#include <iostream>
+
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
+
+#include <fstream>
+#include <iostream>
+
+#include "onnx.pb.h"
+
+namespace TensorCompiler {
 
 ONNXParser::ONNXParser() {
     model_ = new onnx::ModelProto();
@@ -18,12 +23,13 @@ ONNXParser::~ONNXParser() {
 bool ONNXParser::load(const std::string& filename) {
     std::ifstream input(filename, std::ios::binary);
     if (!input.is_open()) {
-        std::cerr << "failed to open file: " << filename << "\n"; //TODO - logger
+        std::cerr << "failed to open file: " << filename
+                  << "\n";  // TODO - logger
         return false;
     }
 
     if (!model_->ParseFromIstream(&input)) {
-        std::cerr << "failed to parse model_" << "\n"; //TODO - logger
+        std::cerr << "failed to parse model_" << "\n";  // TODO - logger
         return false;
     }
     return true;
@@ -113,13 +119,14 @@ std::vector<ONNXParser::NodeInfo> ONNXParser::getNodes() const {
     return nodes;
 }
 
-std::optional<std::vector<float>> ONNXParser::getWeights(const std::string& tensorName) const {
+std::optional<std::vector<float>> ONNXParser::getWeights(
+    const std::string& tensorName) const {
     if (!model_ || !model_->has_graph()) return std::nullopt;
     const auto& graph = model_->graph();
     for (const auto& init : graph.initializer()) {
         if (init.name() == tensorName) {
             std::vector<float> weights;
-            if (init.data_type() == 1) { // 1 = FLOAT // ХУЙНЯ -
+            if (init.data_type() == 1) {  // 1 = FLOAT // ХУЙНЯ -
                 const char* data = init.raw_data().data();
                 size_t size = init.raw_data().size() / sizeof(float);
                 weights.resize(size);
@@ -169,3 +176,5 @@ void ONNXParser::dump() const {
         }
     }
 }
+
+}  // namespace TensorCompiler

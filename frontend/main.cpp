@@ -1,5 +1,6 @@
-#include "parser/onnx/include/parser.hpp"
 #include <iostream>
+
+#include "parser/onnx/include/parser.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -7,7 +8,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    ONNXParser parser;
+    TensorCompiler::ONNXParser parser;
 
     if (!parser.load(argv[1])) {
         std::cerr << "Failed to parse ONNX model\n";

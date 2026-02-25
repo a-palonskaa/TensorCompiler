@@ -1,14 +1,17 @@
 #pragma once
 
-#include "onnx.pb.h"
-#include <string>
-#include <vector>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
+#include "onnx.pb.h"
+#include "types.hpp"
+
+namespace TensorCompiler {
 
 class ONNXParser {
-public:
+   public:
     ONNXParser();
     ~ONNXParser();
 
@@ -33,8 +36,12 @@ public:
     std::vector<TensorInfo> getInputs() const;
     std::vector<TensorInfo> getOutputs() const;
     std::vector<NodeInfo> getNodes() const;
-    std::optional<std::vector<float>> getWeights(const std::string& tensorName) const;
-private:
+    std::optional<std::vector<float>> getWeights(
+        const std::string& tensorName) const;
+
+   private:
     onnx::ModelProto* model_;
-    // Graph* graph_;
+    Graph* graph_;
 };
+
+}  // namespace TensorCompiler
