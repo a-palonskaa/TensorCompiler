@@ -36,7 +36,7 @@ class Tensor {
     bool is_constant_ = false;
     std::vector<uint8_t> raw_data_;
 
-    std::string producer_ = 0;
+    std::string producer_;
     std::vector<std::string> consumers_;
 };
 
@@ -65,6 +65,8 @@ class Graph {
 
     std::vector<std::string> inputs_;
     std::vector<std::string> outputs_;
+
+    void ToGraphViz(const std::string& filename) const;
 };
 
 }  // namespace TensorCompiler

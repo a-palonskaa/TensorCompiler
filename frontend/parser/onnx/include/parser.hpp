@@ -15,9 +15,6 @@ class ONNXParser {
     ONNXParser();
     ~ONNXParser();
 
-    bool load(const std::string& filename);
-    void dump() const;
-
     struct TensorInfo {
         std::string name;
         std::vector<int64_t> dimensions;
@@ -31,6 +28,8 @@ class ONNXParser {
         std::vector<std::string> outputs;
     };
 
+    bool load(const std::string& filename);
+
     std::string getModelVersion() const;
     std::string getProducerName() const;
     std::vector<TensorInfo> getInputs() const;
@@ -39,9 +38,12 @@ class ONNXParser {
     std::optional<std::vector<float>> getWeights(
         const std::string& tensorName) const;
 
+    void dump() const;
+    Graph ParseGraph() const;
+
    private:
-    onnx::ModelProto* model_;
-    Graph* graph_;
+    std::unique_ptr<onnx::ModelProto> model_;
+    std::unique_ptr<Graph> graph_;
 };
 
 }  // namespace TensorCompiler

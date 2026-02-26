@@ -18,6 +18,7 @@ protobuf_generate_cpp(
 add_library(onnx_parser
     STATIC
         frontend/parser/onnx/src/parser.cpp
+        frontend/graphviz/src/graphviz.cpp
         ${ONNX_PROTO_SRCS}
 )
 
@@ -25,6 +26,7 @@ target_include_directories(onnx_parser
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/parser/onnx/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/ir/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/graphviz/include
         ${Protobuf_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -41,6 +43,7 @@ target_include_directories(run
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/parser/onnx/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/ir/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/graphviz/include
         ${Protobuf_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
 )

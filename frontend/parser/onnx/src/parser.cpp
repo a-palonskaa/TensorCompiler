@@ -6,19 +6,17 @@
 #include <fstream>
 #include <iostream>
 
+#include "converters.hpp"
 #include "onnx.pb.h"
 
 namespace TensorCompiler {
 
 ONNXParser::ONNXParser() {
-    model_ = new onnx::ModelProto();
+    model_ = std::make_unique<onnx::ModelProto>();
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
 
-ONNXParser::~ONNXParser() {
-    delete model_;
-    google::protobuf::ShutdownProtobufLibrary();
-}
+ONNXParser::~ONNXParser() { google::protobuf::ShutdownProtobufLibrary(); }
 
 bool ONNXParser::load(const std::string& filename) {
     std::ifstream input(filename, std::ios::binary);
@@ -175,6 +173,63 @@ void ONNXParser::dump() const {
             std::cout << "\n";
         }
     }
+}
+
+Graph ONNXParser::ParseGraph() const {
+    Graph graph;
+
+    if (!model_ || !model_->has_graph()) return graph;
+    const auto& onnx_graph = model_->graph();
+
+    for (const auto& input : onnx_graph.input()) {
+        graph.tensors_[input.name()] = ConvertTensorFromValueInfo(input);
+        graph.inputs_.push_back(input.name());
+    }
+
+    for (const auto& output : onnx_graph.output()) {
+        graph.tensors_[output.name()] = ConvertTensorFromValueInfo(output);
+        graph.outputs_.push_back(output.name());
+    }
+
+    for (const auto& init : onnx_graph.initializer()) {
+        graph.tensors_[init.name()] = ConvertTensorFromInitializer(init);
+    }
+
+    for (const auto& value_info : onnx_graph.value_info()) {
+        if (graph.tensors_.find(value_info.name()) == graph.tensors_.end()) {
+            graph.tensors_[value_info.name()] =
+                ConvertTensorFromValueInfo(value_info);
+        }
+    }
+
+    for (const auto& node_proto : onnx_graph.node()) {
+        for (const auto& out : node_proto.output()) {
+            if (graph.tensors_.find(out) == graph.tensors_.end()) {
+                auto tensor = std::make_unique<Tensor>();
+                tensor->name_ = out;
+                tensor->data_type_ = DataType::UNDEFINED;
+                graph.tensors_[out] = std::move(tensor);
+            }
+        }
+    }
+
+    for (const auto& node_proto : onnx_graph.node()) {
+        auto node = ConvertNode(node_proto);
+        std::string node_name = node->name_;
+        graph.nodes_[node->name_] = std::move(node);
+
+        for (const auto& out : graph.nodes_[node_name]->outputs_) {
+            graph.tensors_[out]->producer_ = node_name;
+        }
+        for (const auto& in : graph.nodes_[node_name]->inputs_) {
+            if (!in.empty() &&
+                graph.tensors_.find(in) != graph.tensors_.end()) {
+                graph.tensors_[in]->consumers_.push_back(node_name);
+            }
+        }
+    }
+
+    return graph;
 }
 
 }  // namespace TensorCompiler
