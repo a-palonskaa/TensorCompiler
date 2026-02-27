@@ -28,6 +28,7 @@ target_include_directories(onnx_parser
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/parser/onnx/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/ir/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/graphviz/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/logger
         ${Protobuf_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -53,6 +54,7 @@ target_include_directories(run
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/parser/onnx/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/ir/include
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/graphviz/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/logger
         ${Protobuf_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
