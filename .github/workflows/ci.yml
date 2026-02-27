@@ -23,7 +23,7 @@ jobs:
         run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto
 
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ graphviz protobuf-compiler libprotobuf-dev
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ graphviz protobuf-compiler libprotobuf-dev libabsl-dev
 
       - name: Cache CMake deps
         uses: actions/cache@v4
