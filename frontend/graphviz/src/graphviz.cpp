@@ -91,13 +91,9 @@ void Graph::ToGraphViz(const std::string& filename) const {
         << "  nodesep=0.5; ranksep=1.0;\n"
         << "  node [fontname=\"Helvetica\"];\n\n";
 
-    ofs << "  subgraph cluster_ops {\n"
-        << "    label=\"Operators\";\n"
-        << "    style=filled; fillcolor=azure;\n";
-
     for (const auto& [name, node] : nodes_) {
         std::string color =
-            (node->op_type_ == OpType::Unknown) ? "crimson" : "royalblue4";
+            (node->op_type_ == OpType::Unknown) ? "crimson" : "lightblue";
         std::string label = name + "\\n" + OpTypeToString(node->op_type_);
 
         if (!node->attributes_.empty()) {
@@ -111,34 +107,32 @@ void Graph::ToGraphViz(const std::string& filename) const {
             label += "]";
         }
 
-        ofs << "    \"" << name << "\" [label=\"" << label
+        ofs << "  \"" << name << "\" [label=\"" << label
             << "\", shape=box, style=filled, fillcolor=" << color << "];\n";
     }
-    ofs << "  }\n\n";
 
-    ofs << "  subgraph cluster_tensors {\n"
-        << "    label=\"Tensors\";\n"
-        << "    style=dashed;\n";
+    ofs << "\n";
 
     for (const auto& [name, tensor] : tensors_) {
         std::string color = tensor->is_constant_ ? "lightgreen" : "yellow";
         std::string shape_str = ShapeToString(tensor->shape_);
-        ofs << "    \"T_" << name << "\" [label=\"" << name << "\\n"
+        ofs << "  \"T_" << name << "\" [label=\"" << name << "\\n"
             << shape_str
             << "\", shape=ellipse, style=filled, fillcolor=" << color << "];\n";
     }
-    ofs << "  }\n\n";
+
+    ofs << "\n";
 
     for (const auto& [name, node] : nodes_) {
         for (const auto& out : node->outputs_) {
             auto it = tensors_.find(out);
             if (it == tensors_.end()) {
                 std::cerr << "Warning: output tensor '" << out
-                          << "' not found in graph\n";  // TODO - logger
+                          << "' not found in graph\n";
                 continue;
             }
             ofs << "  \"" << name << "\" -> \"T_" << out
-                << "\" [style=dashed, label=\"produces\", color=red];\n";
+                << "\" [label=\"produces\", color=red];\n";
         }
     }
 
@@ -148,7 +142,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
             auto it = tensors_.find(in);
             if (it == tensors_.end()) {
                 std::cerr << "Warning: input tensor '" << in
-                          << "' not found in graph\n";  // TODO - logger
+                          << "' not found in graph\n";
                 continue;
             }
             ofs << "  \"T_" << in << "\" -> \"" << name << "\" [label=\"" << in
@@ -156,27 +150,19 @@ void Graph::ToGraphViz(const std::string& filename) const {
         }
     }
 
-    ofs << "    legend_text [\n"
-        << "      label=<\n"
-        << "        <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" "
-           "cellpadding=\"4\">\n"
-        << "          <tr><td colspan=\"2\"><b>Legend</b></td></tr>\n"
-        << "          <tr><td>Operator (known)</td><td bgcolor=\"royalblue4\"> "
-           "</td></tr>\n"
-        << "          <tr><td>Operator (unknown)</td><td bgcolor=\"crimson\"> "
-           "</td></tr>\n"
-        << "          <tr><td>Tensor</td><td bgcolor=\"yellow\"> "
-           "</td></tr>\n"
-        << "          <tr><td>Constant tensor</td><td "
-           "bgcolor=\"lightgreen\"> </td></tr>\n"
-        << "          <tr><td>Takes tensor as input</td><td><font "
-           "color=\"green\">green</font></td></tr>\n"
-        << "        </table>\n"
-        << "      >,\n"
-        << "      shape=plaintext\n"
-        << "    ];\n";
+    ofs << "  legend_text [\n"
+        << "    label=<\n"
+        << "      <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"4\">\n"
+        << "        <tr><td colspan=\"2\"><b>Legend</b></td></tr>\n"
+        << "        <tr><td>Operator</td><td bgcolor=\"lightblue\"> </td></tr>\n"
+        << "        <tr><td>Tensor</td><td bgcolor=\"yellow\"> </td></tr>\n"
+        << "        <tr><td>Constant tensor</td><td bgcolor=\"lightgreen\"> </td></tr>\n"
+        << "        <tr><td>Unknown</td><td bgcolor=\"crimson\"> </td></tr>\n"
+        << "      </table>\n"
+        << "    >,\n"
+        << "    shape=plaintext\n"
+        << "  ];\n";
 
     ofs << "}\n";
 }
-
-}  // namespace TensorCompiler
+} // namespace TensorCompiler
