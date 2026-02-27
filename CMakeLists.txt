@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Protobuf REQUIRED)
+find_package(absl REQUIRED)
 
 set(ONNX_PROTO "${CMAKE_CURRENT_SOURCE_DIR}/onnx.proto")
 
@@ -32,12 +33,20 @@ target_include_directories(onnx_parser
 )
 
 target_link_libraries(onnx_parser
-    PRIVATE
+    PUBLIC
         ${Protobuf_LIBRARIES}
+        ${Protobuf_TARGETS}
+        absl::log_internal_check_op  # Add this
+        absl::log_internal_message    # Add this
+        absl::log_internal_nullguard  # Add this
+        absl::log_internal_proto      # Add this
+        absl::log_initialize          # Add this
+        absl::log_severity            # Add this
 )
 
 add_executable(run
-    frontend/main.cpp)
+    frontend/main.cpp
+)
 
 target_include_directories(run
     PRIVATE
@@ -51,10 +60,16 @@ target_include_directories(run
 target_link_libraries(run
     PRIVATE
         onnx_parser
+        ${Protobuf_TARGETS}
+        absl::log_internal_check_op
+        absl::log_internal_message
+        absl::log_internal_nullguard
+        absl::log_internal_proto
+        absl::log_initialize
+        absl::log_severity
 )
 
 add_subdirectory(flags)
 
 #enable_testing()
-
 #add_subdirectory(tests)
