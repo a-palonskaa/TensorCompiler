@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Logger::getInstance().setlogFile_("./logs/frontend.log");
+    Logger::getInstance().setlogFile("./logs/frontend.log");
 
 #ifndef NDEBUG
     std::cerr << "Calling ParseGraph... \n";

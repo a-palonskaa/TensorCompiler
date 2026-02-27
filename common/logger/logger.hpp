@@ -57,7 +57,7 @@ class Logger {
         }
     }
 
-    bool setlogFile_(const string& filename) {
+    bool setlogFile(const string& filename) {
         if (logFile_.is_open()) {
             logFile_.close();
         }
