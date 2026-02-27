@@ -2,7 +2,8 @@
 #include <iostream>
 #include <string>
 
-#include "parser/onnx/include/parser.hpp"
+#include "logger.hpp"
+#include "parser.hpp"
 
 namespace {
 
@@ -30,6 +31,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Failed to parse ONNX model\n";
         return 1;
     }
+
+    Logger::getInstance().setLogFile("./logs/frontend.log");
 
 #ifndef NDEBUG
     std::cerr << "Calling ParseGraph... \n";
