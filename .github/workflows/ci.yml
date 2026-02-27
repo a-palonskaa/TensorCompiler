@@ -109,6 +109,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download onnx.proto
+        run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto
+
+      - name: Verify onnx.proto exists
+        run: ls -la onnx.proto
+
       - name: Install tools
         run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck protobuf-compiler
 
