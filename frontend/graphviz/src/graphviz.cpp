@@ -133,7 +133,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
             auto it = tensors_.find(out);
             if (it == tensors_.end()) {
                 std::cerr << "Warning: output tensor '" << out
-                          << "' not found in graph\n";
+                          << "' not found in graph\n";  // TODO - logger
                 continue;
             }
             ofs << "  \"" << name << "\" -> \"T_" << out
@@ -147,7 +147,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
             auto it = tensors_.find(in);
             if (it == tensors_.end()) {
                 std::cerr << "Warning: input tensor '" << in
-                          << "' not found in graph\n";
+                          << "' not found in graph\n";  // TODO - logger
                 continue;
             }
             ofs << "  \"T_" << in << "\" -> \"" << name << "\" [label=\"" << in

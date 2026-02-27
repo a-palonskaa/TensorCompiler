@@ -27,6 +27,8 @@ DataType ConvertDataType(int onnx_type) {
         case onnx::TensorProto_DataType_STRING:
             return DataType::STRING;
         default:
+            std::cerr << "Unsupported ONNX data type: " << onnx_type
+                      << "\n";  // TODO - logger
             return DataType::UNDEFINED;
     }
 }
@@ -38,6 +40,9 @@ OpType ConvertOpType(const std::string& op_type_str) {
     if (op_type_str == "Relu") return OpType::Relu;
     if (op_type_str == "MatMul") return OpType::MatMul;
     if (op_type_str == "Gemm") return OpType::Gemm;
+
+    std::cerr << "Unknown operation type: " << op_type_str
+              << "\n";  // TODO - logger
     return OpType::Unknown;
 }
 
@@ -57,8 +62,10 @@ std::unique_ptr<Tensor> ConvertTensorFromValueInfo(
             }
         }
         return tensor;
+    } else {
+        std::cerr << "ValueUnfo '" << value_info.name()
+                  << "' has no tensor type information \n";  // TODO - logger
     }
-    // TODO - log добавить
     return tensor;
 }
 
@@ -69,12 +76,66 @@ std::unique_ptr<Tensor> ConvertTensorFromInitializer(
     tensor->data_type_ = ConvertDataType(init.data_type());
     tensor->shape_.assign(init.dims().begin(), init.dims().end());
     tensor->is_constant_ = true;
+
+    size_t elem_size = 0;
+    switch (init.data_type()) {
+        case onnx::TensorProto_DataType_FLOAT:
+        case onnx::TensorProto_DataType_INT32:
+            elem_size = 4;
+            break;
+        case onnx::TensorProto_DataType_INT64:
+            elem_size = 8;
+            break;
+        case onnx::TensorProto_DataType_INT8:
+        case onnx::TensorProto_DataType_BOOL:
+            elem_size = 1;
+            break;
+        case onnx::TensorProto_DataType_INT16:
+            elem_size = 2;
+            break;
+        case onnx::TensorProto_DataType_STRING:
+            elem_size = 0;
+            break;
+        default:
+            std::cerr << "Unsupported data type in initializer '" << init.name()
+                      << "', raw_data may be incorrect.\n";  // TODO - logger
+            elem_size = 1;
+            break;
+    }
+
     if (init.has_raw_data()) {
         tensor->raw_data_.assign(init.raw_data().begin(),
                                  init.raw_data().end());
-        return tensor;
-    }  // else { //TODO - обработка других типов }
-    // TODO - log про отсутствующий тип?
+        size_t expected_bytes = elem_size;
+        for (int64_t dim : init.dims()) {
+            expected_bytes *= dim;
+        }
+        if (!init.dims().empty() && init.raw_data().size() != expected_bytes) {
+            std::cerr << "Raw data size incorrect for '" << init.name();
+        }
+    } else if (init.data_type() ==
+               onnx::TensorProto_DataType_STRING) {  // TODO -  ?? обработка
+                                                     // стрингов, у них пустой
+                                                     // raw_data, но есть
+                                                     // string_data в onnx.pb.h
+    } else {
+        if (init.float_data_size() > 0) {
+            const float* data = init.float_data().data();
+            tensor->raw_data_.resize(init.float_data_size() * sizeof(float));
+            std::memcpy(tensor->raw_data_.data(), data,
+                        tensor->raw_data_.size());
+        } else if (init.int64_data_size() > 0) {
+            const int64_t* data = init.int64_data().data();
+            tensor->raw_data_.resize(init.int64_data_size() * sizeof(int64_t));
+            std::memcpy(tensor->raw_data_.data(), data,
+                        tensor->raw_data_.size());
+        } else if (init.int32_data_size() > 0) {
+            const int32_t* data = init.int32_data().data();
+            tensor->raw_data_.resize(init.int32_data_size() * sizeof(int32_t));
+            std::memcpy(tensor->raw_data_.data(), data,
+                        tensor->raw_data_.size());
+        }
+    }
     return tensor;
 }
 
@@ -100,6 +161,9 @@ Attribute ConvertAttribute(const onnx::AttributeProto& attr_proto) {
                                              attr_proto.floats().end());
             break;
         default:
+            std::cerr << "Unsupported attribute type " << attr_proto.type()
+                      << " for attribute '" << attr_proto.name()
+                      << "'\n";  // TODO - logger
             attr.value_ = std::monostate{};
             break;
     }
