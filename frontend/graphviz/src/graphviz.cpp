@@ -155,7 +155,29 @@ void Graph::ToGraphViz(const std::string& filename) const {
         }
     }
 
-    ofs << "}\n";
+    ofs << "    legend_text [\n"
+        << "      label=<\n"
+        << "        <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" "
+           "cellpadding=\"4\">\n"
+        << "          <tr><td colspan=\"2\"><b>Legend</b></td></tr>\n"
+        << "          <tr><td>Operator (known)</td><td bgcolor=\"royalblue4\"> "
+           "</td></tr>\n"
+        << "          <tr><td>Operator (unknown)</td><td bgcolor=\"crimson\"> "
+           "</td></tr>\n"
+        << "          <tr><td>Tensor</td><td bgcolor=\"yellow\"> "
+           "</td></tr>\n"
+        << "          <tr><td>Constant tensor</td><td "
+           "bgcolor=\"lightgreen\"> </td></tr>\n"
+        << "          <tr><td>Takes tensor as input</td><td><font "
+           "color=\"green\">green</font></td></tr>\n"
+        << "        </table>\n"
+        << "      >,\n"
+        << "      shape=plaintext\n"
+        << "    ];\n";
+
+    ofs << "  }\n\n";
+
+    // ofs << "}\n";
 }
 
 }  // namespace TensorCompiler
