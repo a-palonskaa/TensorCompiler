@@ -25,7 +25,8 @@ int main(int argc, char* argv[]) {
 
     TensorCompiler::ONNXParser parser;
 
-    if (!parser.load(argv[1])) {
+    std::string path = std::string("./models/") + argv[1];
+    if (!parser.load(path)) {
         std::cerr << "Failed to parse ONNX model\n";
         return 1;
     }
@@ -34,8 +35,8 @@ int main(int argc, char* argv[]) {
     std::cerr << "Calling ParseGraph... \n";
 #endif  // NDEBUG
     const auto& graph = parser.ParseGraph();
-    std::string dot_filename = replace_extension(argv[1], ".dot");
-    std::string png_filename = replace_extension(argv[1], ".png");
+    std::string dot_filename = "./images/" + replace_extension(argv[1], ".dot");
+    std::string png_filename = "./images/" + replace_extension(argv[1], ".png");
 
 #ifndef NDEBUG
     std::cerr << "Calling ToGraphViz...\n";

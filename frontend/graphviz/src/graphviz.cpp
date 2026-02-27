@@ -87,6 +87,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
 
     ofs << "digraph G {\n"
         << "  rankdir=TB;\n"
+        << "  newrank=true;\n"
         << "  nodesep=0.5; ranksep=1.0;\n"
         << "  node [fontname=\"Helvetica\"];\n\n";
 
@@ -137,7 +138,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
                 continue;
             }
             ofs << "  \"" << name << "\" -> \"T_" << out
-                << "\" [style=dashed, label=\"produces\", color=cornsilk];\n";
+                << "\" [style=dashed, label=\"produces\", color=red];\n";
         }
     }
 
@@ -151,7 +152,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
                 continue;
             }
             ofs << "  \"T_" << in << "\" -> \"" << name << "\" [label=\"" << in
-                << "\", color=green];\n";
+                << "\", color=blue];\n";
         }
     }
 
@@ -175,9 +176,7 @@ void Graph::ToGraphViz(const std::string& filename) const {
         << "      shape=plaintext\n"
         << "    ];\n";
 
-    ofs << "  }\n\n";
-
-    // ofs << "}\n";
+    ofs << "}\n";
 }
 
 }  // namespace TensorCompiler

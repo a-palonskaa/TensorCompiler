@@ -1,7 +1,7 @@
 build/
+images/
 .vscode
 *.out
 *.dot
 *.png
-*.onnx
 *.proto
