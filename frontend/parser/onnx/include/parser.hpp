@@ -8,6 +8,8 @@
 #include "onnx.pb.h"
 #include "types.hpp"
 
+using TensorData = std::variant<std::vector<float>, std::vector<double>, std::vector<int32_t>, std::vector<int64_t>>;
+
 namespace TensorCompiler {
 
 class ONNXParser {
@@ -35,8 +37,7 @@ class ONNXParser {
     std::vector<TensorInfo> getInputs() const;
     std::vector<TensorInfo> getOutputs() const;
     std::vector<NodeInfo> getNodes() const;
-    std::optional<std::vector<float>> getWeights(
-        const std::string& tensorName) const;
+    std::optional<TensorData> getWeights(const std::string& tensorName) const;
 
     void dump() const;
     const Graph& ParseGraph();

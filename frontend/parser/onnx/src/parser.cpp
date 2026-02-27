@@ -21,13 +21,12 @@ ONNXParser::~ONNXParser() { google::protobuf::ShutdownProtobufLibrary(); }
 bool ONNXParser::load(const std::string& filename) {
     std::ifstream input(filename, std::ios::binary);
     if (!input.is_open()) {
-        std::cerr << "failed to open file: " << filename
-                  << "\n";  // TODO - logger
+        std::cerr << "failed to open file: " << filename << "\n";
         return false;
     }
 
     if (!model_->ParseFromIstream(&input)) {
-        std::cerr << "failed to parse model_" << "\n";  // TODO - logger
+        std::cerr << "failed to parse model_" << "\n";
         return false;
     }
     return true;
@@ -117,23 +116,60 @@ std::vector<ONNXParser::NodeInfo> ONNXParser::getNodes() const {
     return nodes;
 }
 
-std::optional<std::vector<float>> ONNXParser::getWeights(
-    const std::string& tensorName) const {
+std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) const {
     if (!model_ || !model_->has_graph()) return std::nullopt;
+
     const auto& graph = model_->graph();
     for (const auto& init : graph.initializer()) {
-        if (init.name() == tensorName) {
-            std::vector<float> weights;
-            if (init.data_type() ==
-                1) {  // FIXME -  = FLOAT // ХУЙНЯ - а что именно хуевого? можно
-                      // же NOTE -  просто onnx::TensorProto_DataType_FLOAT
-                      // вместо единицы
-                const char* data = init.raw_data().data();
-                size_t size = init.raw_data().size() / sizeof(float);
-                weights.resize(size);
-                std::memcpy(weights.data(), data, init.raw_data().size());
+        if (init.name() != tensorName) continue;
+
+        switch (init.data_type()) {
+            case onnx::TensorProto_DataType_FLOAT: {
+                std::vector<float> data;
+                if (init.has_raw_data()) {
+                    size_t size = init.raw_data().size() / sizeof(float);
+                    data.resize(size);
+                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                } else {
+                    data.assign(init.float_data().begin(), init.float_data().end());
+                }
+                return data;
             }
-            return weights;
+            case onnx::TensorProto_DataType_DOUBLE: {
+                std::vector<double> data;
+                if (init.has_raw_data()) {
+                    size_t size = init.raw_data().size() / sizeof(double);
+                    data.resize(size);
+                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                } else {
+                    data.assign(init.double_data().begin(), init.double_data().end());
+                }
+                return data;
+            }
+            case onnx::TensorProto_DataType_INT32: {
+                std::vector<int32_t> data;
+                if (init.has_raw_data()) {
+                    size_t size = init.raw_data().size() / sizeof(int32_t);
+                    data.resize(size);
+                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                } else {
+                    data.assign(init.int32_data().begin(), init.int32_data().end());
+                }
+                return data;
+            }
+            case onnx::TensorProto_DataType_INT64: {
+                std::vector<int64_t> data;
+                if (init.has_raw_data()) {
+                    size_t size = init.raw_data().size() / sizeof(int64_t);
+                    data.resize(size);
+                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                } else {
+                    data.assign(init.int64_data().begin(), init.int64_data().end());
+                }
+                return data;
+            }
+            default:
+                return std::nullopt;
         }
     }
     return std::nullopt;

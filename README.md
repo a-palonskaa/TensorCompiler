@@ -1,14 +1,7 @@
-# Proto
+# Generate
 
 ```bash
-wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto
-
-wget https://github.com/onnx/models/raw/main/validated/vision/classification/mnist/model/mnist-8.onnx
-```
-
-# Compile
-
-```bash
+rm -rf build
 cmake -S . -B build -DCMAKE-COMPILE-OPTIONS=ON
 cmake --build build
 ```
@@ -16,5 +9,8 @@ cmake --build build
 # Run
 
 ```bash
-./run mnist-8.onnx
+./build/run [name].onnx
 ```
+name from `./models`
+image of graph is located in `./images`
+
