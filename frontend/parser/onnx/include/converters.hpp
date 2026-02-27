@@ -4,8 +4,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "parser.hpp"
 #include "onnx.pb.h"
+#include "parser.hpp"
 #include "types.hpp"
 
 namespace TensorCompiler {

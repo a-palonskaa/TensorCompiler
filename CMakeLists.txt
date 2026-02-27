@@ -37,12 +37,12 @@ target_link_libraries(onnx_parser
     PUBLIC
         ${Protobuf_LIBRARIES}
         ${Protobuf_TARGETS}
-        absl::log_internal_check_op  # Add this
-        absl::log_internal_message    # Add this
-        absl::log_internal_nullguard  # Add this
-        absl::log_internal_proto      # Add this
-        absl::log_initialize          # Add this
-        absl::log_severity            # Add this
+        absl::log_internal_check_op
+        absl::log_internal_message
+        absl::log_internal_nullguard
+        absl::log_internal_proto
+        absl::log_initialize
+        absl::log_severity
 )
 
 add_executable(run

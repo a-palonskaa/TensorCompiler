@@ -1,12 +1,13 @@
+#include "parser.hpp"
+
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 
 #include <fstream>
 #include <iostream>
 
-#include "parser.hpp"
-#include "logger.hpp"
 #include "converters.hpp"
+#include "logger.hpp"
 #include "onnx.pb.h"
 
 namespace TensorCompiler {
@@ -118,7 +119,8 @@ std::vector<ONNXParser::NodeInfo> ONNXParser::getNodes() const {
     return nodes;
 }
 
-std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) const {
+std::optional<TensorData> ONNXParser::getWeights(
+    const std::string& tensorName) const {
     if (!model_ || !model_->has_graph()) return std::nullopt;
 
     const auto& graph = model_->graph();
@@ -131,9 +133,11 @@ std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) 
                 if (init.has_raw_data()) {
                     size_t size = init.raw_data().size() / sizeof(float);
                     data.resize(size);
-                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                    std::memcpy(data.data(), init.raw_data().data(),
+                                init.raw_data().size());
                 } else {
-                    data.assign(init.float_data().begin(), init.float_data().end());
+                    data.assign(init.float_data().begin(),
+                                init.float_data().end());
                 }
                 return data;
             }
@@ -142,9 +146,11 @@ std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) 
                 if (init.has_raw_data()) {
                     size_t size = init.raw_data().size() / sizeof(double);
                     data.resize(size);
-                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                    std::memcpy(data.data(), init.raw_data().data(),
+                                init.raw_data().size());
                 } else {
-                    data.assign(init.double_data().begin(), init.double_data().end());
+                    data.assign(init.double_data().begin(),
+                                init.double_data().end());
                 }
                 return data;
             }
@@ -153,9 +159,11 @@ std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) 
                 if (init.has_raw_data()) {
                     size_t size = init.raw_data().size() / sizeof(int32_t);
                     data.resize(size);
-                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                    std::memcpy(data.data(), init.raw_data().data(),
+                                init.raw_data().size());
                 } else {
-                    data.assign(init.int32_data().begin(), init.int32_data().end());
+                    data.assign(init.int32_data().begin(),
+                                init.int32_data().end());
                 }
                 return data;
             }
@@ -164,9 +172,11 @@ std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) 
                 if (init.has_raw_data()) {
                     size_t size = init.raw_data().size() / sizeof(int64_t);
                     data.resize(size);
-                    std::memcpy(data.data(), init.raw_data().data(), init.raw_data().size());
+                    std::memcpy(data.data(), init.raw_data().data(),
+                                init.raw_data().size());
                 } else {
-                    data.assign(init.int64_data().begin(), init.int64_data().end());
+                    data.assign(init.int64_data().begin(),
+                                init.int64_data().end());
                 }
                 return data;
             }
