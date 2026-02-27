@@ -110,7 +110,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install tools
-        run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck
+        run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck protobuf-compiler
+
+      - name: Generate protobuf files
+        run: protoc --cpp_out=. onnx.proto
 
       - name: Check formatting (clang-format)
         run: |
@@ -119,4 +122,12 @@ jobs:
 
       - name: Run cppcheck
         run: |
-          cppcheck --enable=all --inconclusive --suppress=missingIncludeSystem --error-exitcode=1 --quiet frontend common flags tests
+          cppcheck --enable=all --inconclusive \
+                  --suppress=missingIncludeSystem \
+                  --error-exitcode=1 --quiet \
+                  -Ifrontend/parser/onnx/include \
+                  -Ifrontend/ir/include \
+                  -Ifrontend/graphviz/include \
+                  -Icommon/logger \
+                  -I. \
+                  frontend common flags tests
