@@ -1,5 +1,7 @@
 build/
+images/
 .vscode
 *.out
 *.dot
 *.png
+*.proto
