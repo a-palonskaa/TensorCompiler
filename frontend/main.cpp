@@ -33,8 +33,7 @@ int main(int argc, char* argv[]) {
 #ifndef NDEBUG
     std::cerr << "Calling ParseGraph... \n";
 #endif  // NDEBUG
-    auto graph = parser.ParseGraph();
-
+    const auto& graph = parser.ParseGraph();
     std::string dot_filename = replace_extension(argv[1], ".dot");
     std::string png_filename = replace_extension(argv[1], ".png");
 

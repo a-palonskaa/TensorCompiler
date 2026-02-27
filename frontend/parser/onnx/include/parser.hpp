@@ -39,11 +39,13 @@ class ONNXParser {
         const std::string& tensorName) const;
 
     void dump() const;
-    Graph ParseGraph() const;
+    const Graph& ParseGraph();
 
    private:
     std::unique_ptr<onnx::ModelProto> model_;
     std::unique_ptr<Graph> graph_;
+
+    bool graph_parsed_ = false;
 };
 
 }  // namespace TensorCompiler

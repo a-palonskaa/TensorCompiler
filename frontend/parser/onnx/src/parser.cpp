@@ -124,7 +124,10 @@ std::optional<std::vector<float>> ONNXParser::getWeights(
     for (const auto& init : graph.initializer()) {
         if (init.name() == tensorName) {
             std::vector<float> weights;
-            if (init.data_type() == 1) {  // 1 = FLOAT // ХУЙНЯ -
+            if (init.data_type() ==
+                1) {  // FIXME -  = FLOAT // ХУЙНЯ - а что именно хуевого? можно
+                      // же NOTE -  просто onnx::TensorProto_DataType_FLOAT
+                      // вместо единицы
                 const char* data = init.raw_data().data();
                 size_t size = init.raw_data().size() / sizeof(float);
                 weights.resize(size);
@@ -175,8 +178,11 @@ void ONNXParser::dump() const {
     }
 }
 
-Graph ONNXParser::ParseGraph() const {
-    Graph graph;
+const Graph& ONNXParser::ParseGraph() {
+    if (graph_parsed_) return *graph_;
+
+    graph_ = std::make_unique<Graph>();
+    Graph& graph = *graph_;
 
     if (!model_ || !model_->has_graph()) return graph;
     const auto& onnx_graph = model_->graph();
@@ -229,6 +235,7 @@ Graph ONNXParser::ParseGraph() const {
         }
     }
 
+    graph_parsed_ = true;
     return graph;
 }
 
