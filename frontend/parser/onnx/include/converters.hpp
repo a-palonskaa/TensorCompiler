@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "../include/parser.hpp"
+#include "parser.hpp"
 #include "onnx.pb.h"
 #include "types.hpp"
 

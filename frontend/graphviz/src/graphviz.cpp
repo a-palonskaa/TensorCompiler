@@ -1,11 +1,11 @@
-#include "../include/graphviz.hpp"
-
+#include "graphviz.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "logger.hpp"
 #include "types.hpp"
 
 namespace TensorCompiler {
@@ -72,6 +72,7 @@ std::string OpTypeToString(OpType op) {
         case OpType::Gemm:
             return "Gemm";
         default:
+            LOG(ERROR, "unknown operator type");
             return "Unknown";
     }
 }

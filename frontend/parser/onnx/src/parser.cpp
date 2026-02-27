@@ -1,11 +1,11 @@
-#include "parser.hpp"
-
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 
 #include <fstream>
 #include <iostream>
 
+#include "parser.hpp"
+#include "logger.hpp"
 #include "converters.hpp"
 #include "onnx.pb.h"
 
@@ -21,12 +21,12 @@ ONNXParser::~ONNXParser() { google::protobuf::ShutdownProtobufLibrary(); }
 bool ONNXParser::load(const std::string& filename) {
     std::ifstream input(filename, std::ios::binary);
     if (!input.is_open()) {
-        std::cerr << "failed to open file: " << filename << "\n";
+        LOG(ERROR, "failed to open file: " + filename);
         return false;
     }
 
     if (!model_->ParseFromIstream(&input)) {
-        std::cerr << "failed to parse model_" << "\n";
+        LOG(ERROR, "failed to parse model");
         return false;
     }
     return true;
@@ -36,6 +36,7 @@ std::string ONNXParser::getModelVersion() const {
     if (model_ && model_->has_model_version()) {
         return std::to_string(model_->model_version());
     }
+    LOG(INFO, "unknown version of a model");
     return "unknown";
 }
 
@@ -43,6 +44,7 @@ std::string ONNXParser::getProducerName() const {
     if (model_ && model_->has_producer_name()) {
         return model_->producer_name();
     }
+    LOG(INFO, "unknown producer name");
     return "unknown";
 }
 
@@ -177,7 +179,7 @@ std::optional<TensorData> ONNXParser::getWeights(const std::string& tensorName) 
 
 void ONNXParser::dump() const {
     if (!model_) {
-        std::cout << "No model loaded\n";
+        LOG(ERROR, "cannot dump, no model loaded");
         return;
     }
 
