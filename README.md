@@ -1,7 +1,9 @@
 # ***Tensor Compiler***
->*PROJ_FRONT, Tensor Compiler course 26*
+>*FRONTEND*
 
 A frontend for a tensor compiler that parses neural network models in ONNX format and converts them into an internal graph representation. The graph can be visualized using Graphviz.
+
+![graphviz](./readme_images/graph.png)
 
 ## Frontend features
 - Reads **ONNX models** (`.onnx`) using Protocol Buffers;
