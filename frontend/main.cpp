@@ -45,27 +45,19 @@ int main(int argc, const char* argv[]) {
     std::string dot_filename = "./images/" + replace_extension(argv[1], ".dot");
     std::string png_filename = "./images/" + replace_extension(argv[1], ".png");
 
-    int dot_check = std::system("dot -V > /dev/null 2>&1");
-
     std::cout << "\nParsed graph with " << graph.nodes().size() << " nodes and "
               << graph.tensors().size() << " tensors.\n\n";
     parser.dump();
 
     graph.ToGraphViz(dot_filename);
-    if (dot_check != 0) {
-        std::cerr << "Warning: 'dot' (Graphviz) not found in PATH. Skipping "
-                     "PNG generation.\n";
-        std::cout << "\nGraph dot file saved to " << dot_filename << '\n';
-    } else {
-        std::string cmd = "dot -Tpng " + dot_filename + " -o " + png_filename;
 
-        int ret = std::system(cmd.c_str());
-        if (ret != 0) {
-            std::cerr << "Error: failed to render PNG (dot returned " << ret
-                      << ").\n";
-        } else {
-            std::cout << "\nGraph rendered to " << png_filename << '\n';
-        }
+    std::string cmd = "dot -Tpng " + dot_filename + " -o " + png_filename;
+    int ret = std::system(cmd.c_str());
+    if (ret != 0) {
+        std::cerr << "Error: failed to render PNG (dot returned " << ret
+                  << ").\n";
+    } else {
+        std::cout << "\nGraph rendered to " << png_filename << '\n';
     }
 
     return 0;

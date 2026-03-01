@@ -160,14 +160,3 @@ class Graph {
 }  // namespace TensorCompiler
 
 #endif  // TYPES_HPP_
-
-/*
-1. добавляем все input tensors
-2. добавляем все output tensors
-3. добавляем все initialisers tensors
-4. проходим по узлам и собираем все имена выходных тензоров
-5. проходим по node - создаем node, подвязываем все входны(уже существуют), все
-выходные(-//-) и в тензоры записываем producer, consumer
-6. проходим по nodes-initializers(веса) - нет входов, только выходы, выходныне
-тензоры запоминаю как producer
-*/
