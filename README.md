@@ -3,7 +3,7 @@
 
 A frontend for a tensor compiler that parses neural network models in ONNX format and converts them into an internal graph representation. The graph can be visualized using Graphviz.
 
-## Features
+## Frontend features
 - Reads **ONNX models** (`.onnx`) using Protocol Buffers;
 - Builds a computational graph with tensors and operations;
 - Supports operations: *Add*, *Mul*, *Conv*, *Relu*, *MatMul*, *Gemm*;
@@ -47,5 +47,5 @@ git clone https://github.com/abseil/abseil-cpp.git
 ```
 
 ## Authors:
-- *Polonskaya Alina, B01-405 DREC*
+- *Palonskaya Alina, B01-405 DREC*
 - *Makarskaya Alexandra, B01-401 DREC*
