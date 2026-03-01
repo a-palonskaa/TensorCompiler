@@ -34,20 +34,19 @@ constexpr char LOGFILE[] = "frontend.log";
 }  // namespace Config
 
 int main(int argc, const char* argv[]) {
-    if ((argc < 2) || (argc > 3) ||
-        (argc == 3 && strcmp(argv[2], "-d") != 0)) {
+    if ((argc < 2) || (argc > 3) || (argc == 3 && strcmp(argv[2], "-d") != 0)) {
         std::cerr << "Usage: " << argv[0] << " <model.onnx>" << "[optional -d]"
                   << '\n';
         return 0;
     }
 
+    std::filesystem::create_directories(Config::LOGS_DIR);
+    std::filesystem::create_directories(Config::IMG_DIR);
+
     if (!Logger::getInstance().setLogFile(std::string(Config::LOGS_DIR) +
                                           std::string(Config::LOGFILE))) {
         LOG(INFO, "logs will be printed to std::cerr\n");
     }
-
-    std::filesystem::create_directories(Config::LOGS_DIR);
-    std::filesystem::create_directories(Config::IMG_DIR);
 
     std::string dot_filename =
         Config::IMG_DIR + replace_extension(argv[1], Config::DOT_EXT);
