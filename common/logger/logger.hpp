@@ -42,7 +42,7 @@ class Logger {
     void log(LogLevel level, const string& message, const char* file,
              int line) {
         time_t now = time(0);
-        tm* timeinfo = localtime(&now);
+        const tm* timeinfo = localtime(&now);
         char timestamp[20];
         strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeinfo);
 

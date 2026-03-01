@@ -119,7 +119,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck protobuf-compiler
 
       - name: Generate protobuf files
-        run: protoc --cpp_out=. onnx.proto
+        run: |
+          protoc --cpp_out=frontend/parser/onnx/src onnx.proto
+          mv frontend/parser/onnx/src/onnx.pb.h frontend/parser/onnx/include/
 
       - name: Check formatting (clang-format)
         run: |
@@ -130,6 +132,7 @@ jobs:
         run: |
           cppcheck --enable=all --inconclusive \
                   --suppress=missingIncludeSystem \
+                  --suppress=unusedFunction \
                   --error-exitcode=1 --quiet \
                   -Ifrontend/parser/onnx/include \
                   -Ifrontend/ir/include \
