@@ -28,12 +28,34 @@ enum class DataType {
 
 class Tensor {
    public:
+    const auto& name() const { return name_; }
+    const auto& shape() const { return shape_; }
+    DataType data_type() const { return data_type_; }
+    bool is_constant() const { return is_constant_; }
+    const auto& raw_data() const { return raw_data_; }
+    const auto& string_data() const { return string_data_; }
+    const auto& producer() const { return producer_; }
+    const auto& consumers() const { return consumers_; }
+
+    void set_name(const std::string& n) { name_ = n; }
+    void set_shape(const std::vector<int64_t>& s) { shape_ = s; }
+    void set_data_type(DataType t) { data_type_ = t; }
+    void set_is_constant(bool c) { is_constant_ = c; }
+    void set_raw_data(const std::vector<uint8_t>& d) { raw_data_ = d; }
+    void set_string_data(const std::vector<std::string>& d) {
+        string_data_ = d;
+    }
+    void set_producer(const std::string& p) { producer_ = p; }
+    void add_consumer(const std::string& c) { consumers_.push_back(c); }
+
+   private:
     std::string name_;
     std::vector<int64_t> shape_;
-    DataType data_type_;
+    DataType data_type_ = DataType::UNDEFINED;
 
     bool is_constant_ = false;
     std::vector<uint8_t> raw_data_;
+    std::vector<std::string> string_data_;
 
     std::string producer_;
     std::vector<std::string> consumers_;

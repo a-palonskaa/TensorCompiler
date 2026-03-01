@@ -119,11 +119,13 @@ std::unique_ptr<Tensor> ConvertTensorFromInitializer(
                           << init.raw_data().size() << "\n";
             }
         }
-    } else if (init.data_type() ==
-               onnx::TensorProto_DataType_STRING) {  // TODO -  ?? обработка
-                                                     // стрингов, у них пустой
-                                                     // raw_data, но есть
-                                                     // string_data в onnx.pb.h
+    } else if (init.data_type() == onnx::TensorProto_DataType_STRING) {
+        std::vector<std::string> string_data;
+        string_data.reserve(init.string_data_size());
+        for (int i = 0; i < init.string_data_size(); ++i) {
+            string_data.push_back(init.string_data(i));
+        }
+        tensor->set_string_data(std::move(string_data));
     } else {
         if (init.float_data_size() > 0) {
             const float* data = init.float_data().data();
