@@ -46,6 +46,13 @@ cmake --build build --parallel
 Name from `./models`.
 Image of graph and a dot file are located in `./images`.
 
+## Testing
+
+```bash
+cd build
+ctest --output-on-failure
+```
+
 ### Notes
 
 To get absl:

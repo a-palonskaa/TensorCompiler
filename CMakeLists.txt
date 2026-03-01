@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Protobuf REQUIRED)
 find_package(absl REQUIRED)
 
+add_compile_definitions(PROJECT_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+
 set(ONNX_PROTO "${CMAKE_CURRENT_SOURCE_DIR}/onnx.proto")
 
 protobuf_generate_cpp(
@@ -73,5 +75,5 @@ target_link_libraries(run
 
 add_subdirectory(flags)
 
-#enable_testing()
-#add_subdirectory(tests)
+enable_testing()
+add_subdirectory(tests)
