@@ -237,49 +237,59 @@ const Graph& ONNXParser::ParseGraph() {
     const auto& onnx_graph = model_->graph();
 
     for (const auto& input : onnx_graph.input()) {
-        graph.tensors_[input.name()] = ConvertTensorFromValueInfo(input);
-        graph.inputs_.push_back(input.name());
+        auto tensor = ConvertTensorFromValueInfo(input);
+        graph.add_tensor(std::move(tensor));
+        graph.add_input(input.name());
     }
 
     for (const auto& output : onnx_graph.output()) {
-        graph.tensors_[output.name()] = ConvertTensorFromValueInfo(output);
-        graph.outputs_.push_back(output.name());
+        auto tensor = ConvertTensorFromValueInfo(output);
+        graph.add_tensor(std::move(tensor));
+        graph.add_output(output.name());
     }
 
     for (const auto& init : onnx_graph.initializer()) {
-        graph.tensors_[init.name()] = ConvertTensorFromInitializer(init);
+        graph.add_tensor(ConvertTensorFromInitializer(init));
     }
 
     for (const auto& value_info : onnx_graph.value_info()) {
-        if (graph.tensors_.find(value_info.name()) == graph.tensors_.end()) {
-            graph.tensors_.try_emplace(value_info.name(),
-                                       ConvertTensorFromValueInfo(value_info));
+        if (!graph.get_tensor(value_info.name())) {
+            graph.add_tensor(ConvertTensorFromValueInfo(value_info));
         }
     }
 
     for (const auto& node_proto : onnx_graph.node()) {
         for (const auto& out : node_proto.output()) {
-            if (graph.tensors_.find(out) == graph.tensors_.end()) {
+            if (!graph.get_tensor(out)) {
                 auto tensor = std::make_unique<Tensor>();
-                tensor->name_ = out;
-                tensor->data_type_ = DataType::UNDEFINED;
-                graph.tensors_[out] = std::move(tensor);
+                tensor->set_name(out);
+                tensor->set_data_type(DataType::UNDEFINED);
+                graph.add_tensor(std::move(tensor));
             }
         }
     }
 
     for (const auto& node_proto : onnx_graph.node()) {
         auto node = ConvertNode(node_proto);
-        std::string node_name = node->name_;
-        graph.nodes_[node->name_] = std::move(node);
+        std::string node_name = node->name();
+        Node* node_ptr = graph.add_node(std::move(node));
 
-        for (const auto& out : graph.nodes_[node_name]->outputs_) {
-            graph.tensors_[out]->producer_ = node_name;
+        for (const auto& out : node_ptr->outputs()) {
+            if (auto* tensor = graph.get_tensor(out)) {
+                tensor->set_producer(node_name);
+            } else {
+                LOG(ERROR, "Output tensor " + out + " not found for node " +
+                               node_name);
+            }
         }
-        for (const auto& in : graph.nodes_[node_name]->inputs_) {
-            if (!in.empty() &&
-                graph.tensors_.find(in) != graph.tensors_.end()) {
-                graph.tensors_[in]->consumers_.push_back(node_name);
+
+        for (const auto& in : node_ptr->inputs()) {
+            if (in.empty()) continue;
+            if (auto* tensor = graph.get_tensor(in)) {
+                tensor->add_consumer(node_name);
+            } else {
+                LOG(ERROR,
+                    "Input tensor " + in + " not found for node " + node_name);
             }
         }
     }

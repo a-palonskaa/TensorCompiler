@@ -83,7 +83,7 @@ std::string OpTypeToString(OpType op) {
 void Graph::ToGraphViz(const std::string& filename) const {
     std::ofstream ofs(filename);
     if (!ofs) {
-        std::cerr << "Error: cannot open file " << filename << " for writing\n";
+        LOG(ERROR, "Error: cannot open file " + filename + " for writing");
         return;
     }
 
@@ -95,16 +95,16 @@ void Graph::ToGraphViz(const std::string& filename) const {
 
     for (const auto& [name, node] : nodes_) {
         std::string color =
-            (node->op_type_ == OpType::Unknown) ? "crimson" : "lightblue";
-        std::string label = name + "\\n" + OpTypeToString(node->op_type_);
+            (node->op_type() == OpType::Unknown) ? "crimson" : "lightblue";
+        std::string label = name + "\\n" + OpTypeToString(node->op_type());
 
-        if (!node->attributes_.empty()) {
+        if (!node->attributes().empty()) {
             label += "\\n[";
             bool first = true;
-            for (const auto& [attr_name, attr] : node->attributes_) {
+            for (const auto& [attr_name, attr] : node->attributes()) {
                 if (!first) label += ", ";
                 first = false;
-                label += attr_name + "=" + AttributeValueToString(attr.value_);
+                label += attr_name + "=" + AttributeValueToString(attr.value());
             }
             label += "]";
         }
@@ -116,8 +116,8 @@ void Graph::ToGraphViz(const std::string& filename) const {
     ofs << "\n";
 
     for (const auto& [name, tensor] : tensors_) {
-        std::string color = tensor->is_constant_ ? "lightgreen" : "yellow";
-        std::string shape_str = ShapeToString(tensor->shape_);
+        std::string color = tensor->is_constant() ? "lightgreen" : "yellow";
+        std::string shape_str = ShapeToString(tensor->shape());
         ofs << "  \"T_" << name << "\" [label=\"" << name << "\\n"
             << shape_str
             << "\", shape=ellipse, style=filled, fillcolor=" << color << "];\n";
@@ -126,11 +126,11 @@ void Graph::ToGraphViz(const std::string& filename) const {
     ofs << "\n";
 
     for (const auto& [name, node] : nodes_) {
-        for (const auto& out : node->outputs_) {
+        for (const auto& out : node->outputs()) {
             auto it = tensors_.find(out);
             if (it == tensors_.end()) {
-                std::cerr << "Warning: output tensor '" << out
-                          << "' not found in graph\n";
+                LOG(WARNING,
+                    "Warning: output tensor '" + out + "' not found in graph");
                 continue;
             }
             ofs << "  \"" << name << "\" -> \"T_" << out
@@ -139,12 +139,12 @@ void Graph::ToGraphViz(const std::string& filename) const {
     }
 
     for (const auto& [name, node] : nodes_) {
-        for (const auto& in : node->inputs_) {
+        for (const auto& in : node->inputs()) {
             if (in.empty()) continue;
             auto it = tensors_.find(in);
             if (it == tensors_.end()) {
-                std::cerr << "Warning: input tensor '" << in
-                          << "' not found in graph\n";
+                LOG(WARNING,
+                    "Warning: input tensor '" + in + "' not found in graph");
                 continue;
             }
             ofs << "  \"T_" << in << "\" -> \"" << name << "\" [label=\"" << in
@@ -170,4 +170,5 @@ void Graph::ToGraphViz(const std::string& filename) const {
 
     ofs << "}\n";
 }
+
 }  // namespace TensorCompiler
