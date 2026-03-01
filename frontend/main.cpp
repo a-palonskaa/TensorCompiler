@@ -20,6 +20,7 @@ std::string replace_extension(const std::string& filename,
 }  // namespace
 
 namespace Config {
+
 constexpr char LOGS_DIR[] = "./logs/";
 constexpr char IMG_DIR[] = "./images/";
 constexpr char MODELS[] = "./models/";
@@ -29,6 +30,7 @@ constexpr char PNG_EXT[] = ".png";
 constexpr char LOG_EXT[] = ".log";
 
 constexpr char LOGFILE[] = "frontend.log";
+
 }  // namespace Config
 
 int main(int argc, const char* argv[]) {
