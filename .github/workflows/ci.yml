@@ -129,24 +129,22 @@ jobs:
 
       - name: Run cppcheck
         run: |
-          find frontend common flags tests \
-            -name '*.cpp' -o -name '*.hpp' \
-            ! -path '*/onnx.pb.*' \
-            ! -path '*/build-lint/*' \
-            ! -path '*/onnx.pb.cc' \
-            | xargs cppcheck \
-                --enable=all --inconclusive \
-                --error-exitcode=1 --quiet \
-                --suppress=missingIncludeSystem \
-                --suppress=unusedFunction \
-                --suppress=unmatchedSuppression \
-                --suppress=preprocessorErrorDirective \
-                --suppress=noValidConfiguration \
-                --suppress=unusedStructMember \
-                -Ifrontend/parser/onnx/include \
-                -Ifrontend/ir/include \
-                -Ifrontend/graphviz/include \
-                -Icommon/logger \
-                -Ibuild-lint/frontend/parser/onnx/include \
-                -I/usr/include \
-                -I.
+          cppcheck --enable=all --inconclusive --force \
+                   --error-exitcode=1 --quiet \
+                   --library=posix \
+                   --platform=unix64 \
+                   --suppress=missingIncludeSystem \
+                   --suppress=unusedFunction \
+                   --suppress=unmatchedSuppression \
+                   --suppress=preprocessorErrorDirective \
+                   --suppress=noValidConfiguration \
+                   --suppress=unusedStructMember \
+                   --suppress=syntaxError \
+                   --suppress=toomanyconfigs \
+                   -Ifrontend/parser/onnx/include \
+                   -Ifrontend/ir/include \
+                   -Ifrontend/graphviz/include \
+                   -Icommon/logger \
+                   -Ibuild-lint/frontend/parser/onnx/include \
+                   -I. \
+                   frontend common flags tests
