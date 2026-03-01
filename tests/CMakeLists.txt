@@ -8,3 +8,22 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(googletest)
+
+add_executable(parser_test
+    parser_tests.cpp)
+
+target_link_libraries(parser_test
+    PRIVATE
+        onnx_parser
+        GTest::gtest
+)
+
+target_include_directories(parser_test
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../frontend/parser/onnx/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../frontend/ir/include
+        ${CMAKE_BINARY_DIR}
+)
+
+include(GoogleTest)
+gtest_discover_tests(parser_test)
