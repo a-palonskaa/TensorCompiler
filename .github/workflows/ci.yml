@@ -115,8 +115,12 @@ jobs:
       - name: Install tools
         run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck protobuf-compiler
 
-      - name: Configure project (generate onnx.pb.h / .cc)
-        run: cmake -S . -B build-lint -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Generate onnx.pb.h for lint
+        run: |
+          mkdir -p build-lint/frontend/parser/onnx/include
+          protoc --cpp_out=build-lint/frontend/parser/onnx/include \
+                 --proto_path=. \
+                 onnx.proto
 
       - name: Check formatting (clang-format)
         run: |
