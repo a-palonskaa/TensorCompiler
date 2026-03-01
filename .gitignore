@@ -1,6 +1,7 @@
 build/
 images/
 logs/
+Testing/
 .vscode
 *.out
 *.dot
