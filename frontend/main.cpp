@@ -35,7 +35,7 @@ constexpr char LOGFILE[] = "frontend.log";
 
 int main(int argc, const char* argv[]) {
     if ((argc < 2) || (argc > 3) ||
-        (argc == 3 && argv[2] && strcmp(argv[2], "-d") != 0)) {
+        (argc == 3 && strcmp(argv[2], "-d") != 0)) {
         std::cerr << "Usage: " << argv[0] << " <model.onnx>" << "[optional -d]"
                   << '\n';
         return 0;
