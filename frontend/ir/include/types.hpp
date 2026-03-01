@@ -63,13 +63,38 @@ class Tensor {
 
 class Attribute {
    public:
+    const auto& name() const { return name_; }
+    const auto& value() const { return value_; }
+
+    void set_name(const std::string& n) { name_ = n; }
+    void set_value(const AttributeValue& v) { value_ = v; }
+
+   private:
     std::string name_;
-    AttributeValue value_;
+    AttributeValue value_ = std::monostate{};
 };
 
 class Node {
    public:
-    OpType op_type_;
+    OpType op_type() const { return op_type_; }
+    const auto& name() const { return name_; }
+    const auto& domain() const { return domain_; }
+    const auto& inputs() const { return inputs_; }
+    const auto& outputs() const { return outputs_; }
+    const auto& attributes() const { return attributes_; }
+
+    void set_op_type(OpType t) { op_type_ = t; }
+    void set_name(const std::string& n) { name_ = n; }
+    void set_domain(const std::string& d) { domain_ = d; }
+    void set_inputs(const std::vector<std::string>& i) { inputs_ = i; }
+    void set_outputs(const std::vector<std::string>& o) { outputs_ = o; }
+
+    void add_attribute(const std::string& key, const Attribute& attr) {
+        attributes_[key] = attr;
+    }
+
+   private:
+    OpType op_type_ = OpType::Unknown;
     std::string name_;
     std::string domain_;
 
@@ -81,13 +106,55 @@ class Node {
 
 class Graph {
    public:
+    const auto& nodes() const { return nodes_; }
+    const auto& tensors() const { return tensors_; }
+    const auto& inputs() const { return inputs_; }
+    const auto& outputs() const { return outputs_; }
+
+    Tensor* add_tensor(std::unique_ptr<Tensor> tensor) {
+        const std::string& name = tensor->name();
+        tensors_[name] = std::move(tensor);
+        return tensors_[name].get();
+    }
+
+    const Tensor* get_const_tensor(const std::string& name) const {
+        auto it = tensors_.find(name);
+        return it != tensors_.end() ? it->second.get() : nullptr;
+    }
+
+    Tensor* get_tensor(const std::string& name) {
+        auto it = tensors_.find(name);
+        return it != tensors_.end() ? it->second.get() : nullptr;
+    }
+
+    Node* add_node(std::unique_ptr<Node> node) {
+        const std::string& name = node->name();
+        nodes_[name] = std::move(node);
+        return nodes_[name].get();
+    }
+
+    const Node* get_const_node(const std::string& name) const {
+        auto it = nodes_.find(name);
+        return it != nodes_.end() ? it->second.get() : nullptr;
+    }
+
+    Node* get_node(const std::string& name) {
+        auto it = nodes_.find(name);
+        return it != nodes_.end() ? it->second.get() : nullptr;
+    }
+
+    void add_input(const std::string& name) { inputs_.push_back(name); }
+
+    void add_output(const std::string& name) { outputs_.push_back(name); }
+
+    void ToGraphViz(const std::string& filename) const;
+
+   private:
     std::unordered_map<std::string, std::unique_ptr<Tensor>> tensors_;
     std::unordered_map<std::string, std::unique_ptr<Node>> nodes_;
 
     std::vector<std::string> inputs_;
     std::vector<std::string> outputs_;
-
-    void ToGraphViz(const std::string& filename) const;
 };
 
 }  // namespace TensorCompiler

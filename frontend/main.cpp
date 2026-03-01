@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -24,6 +25,9 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
+    std::filesystem::create_directories("./logs");
+    std::filesystem::create_directories("./images");
+
     if (!Logger::getInstance().setlogFile("./logs/frontend.log")) {
         std::cout << "Failed to open log file, logs will be printd out to "
                      "std::cerr only \n";
@@ -37,26 +41,32 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-#ifndef NDEBUG
-    std::cerr << "Calling ParseGraph... \n";
-#endif  // NDEBUG
     const auto& graph = parser.ParseGraph();
     std::string dot_filename = "./images/" + replace_extension(argv[1], ".dot");
     std::string png_filename = "./images/" + replace_extension(argv[1], ".png");
 
-#ifndef NDEBUG
-    std::cerr << "Calling ToGraphViz...\n";
-#endif  // NDEBUG
-    graph.ToGraphViz(dot_filename);
+    int dot_check = std::system("dot -V > /dev/null 2>&1");
 
-    std::cout << "\nParsed graph with " << graph.nodes_.size() << " nodes and "
-              << graph.tensors_.size() << " tensors.\n\n";
+    std::cout << "\nParsed graph with " << graph.nodes().size() << " nodes and "
+              << graph.tensors().size() << " tensors.\n\n";
     parser.dump();
 
-    std::string cmd = "dot -Tpng " + dot_filename + " -o " + png_filename;
-    std::system(cmd.c_str());
+    graph.ToGraphViz(dot_filename);
+    if (dot_check != 0) {
+        std::cerr << "Warning: 'dot' (Graphviz) not found in PATH. Skipping "
+                     "PNG generation.\n";
+        std::cout << "\nGraph dot file saved to " << dot_filename << '\n';
+    } else {
+        std::string cmd = "dot -Tpng " + dot_filename + " -o " + png_filename;
 
-    std::cout << "\nGraph rendered to " << png_filename << '\n';
+        int ret = std::system(cmd.c_str());
+        if (ret != 0) {
+            std::cerr << "Error: failed to render PNG (dot returned " << ret
+                      << ").\n";
+        } else {
+            std::cout << "\nGraph rendered to " << png_filename << '\n';
+        }
+    }
 
     return 0;
 }
