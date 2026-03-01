@@ -86,5 +86,5 @@ class Logger {
     }
 
     std::ofstream fileStream_;
-    std::ostream* output_;
+    std::ostream* output_ = &std::cerr;
 };
