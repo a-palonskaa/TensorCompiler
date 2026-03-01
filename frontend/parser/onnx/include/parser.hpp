@@ -21,7 +21,7 @@ class ONNXParser {
     struct TensorInfo {
         std::string name;
         std::vector<int64_t> dimensions;
-        int dataType;
+        int dataType = 0;
     };
 
     struct NodeInfo {

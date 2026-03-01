@@ -139,7 +139,6 @@ jobs:
                    --suppress=preprocessorErrorDirective \
                    --suppress=noValidConfiguration \
                    --suppress=unusedStructMember \
-                   --suppress=syntaxError \
                    --suppress=toomanyconfigs \
                    -Ifrontend/parser/onnx/include \
                    -Ifrontend/ir/include \

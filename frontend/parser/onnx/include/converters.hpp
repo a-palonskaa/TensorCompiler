@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <numeric>
 
 #include "onnx.pb.h"
 #include "parser.hpp"
@@ -106,12 +107,17 @@ std::unique_ptr<Tensor> ConvertTensorFromInitializer(
     if (init.has_raw_data()) {
         tensor->raw_data_.assign(init.raw_data().begin(),
                                  init.raw_data().end());
-        size_t expected_bytes = elem_size;
-        for (int64_t dim : init.dims()) {
-            expected_bytes *= dim;
-        }
-        if (!init.dims().empty() && init.raw_data().size() != expected_bytes) {
-            std::cerr << "Raw data size incorrect for '" << init.name();
+        if (!init.dims().empty()) {
+            int64_t num_elements =
+                std::accumulate(init.dims().begin(), init.dims().end(), 1LL,
+                                std::multiplies<int64_t>());
+            int64_t expected_bytes = num_elements * elem_size;
+            if (static_cast<int64_t>(init.raw_data().size()) !=
+                expected_bytes) {
+                std::cerr << "Raw data size mismatch for '" << init.name()
+                          << "': expected " << expected_bytes << " bytes, got "
+                          << init.raw_data().size() << "\n";
+            }
         }
     } else if (init.data_type() ==
                onnx::TensorProto_DataType_STRING) {  // TODO -  ?? обработка

@@ -18,10 +18,15 @@ std::string replace_extension(const std::string& filename,
 
 }  // namespace
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <model.onnx>" << '\n';
         return 1;
+    }
+
+    if (!Logger::getInstance().setlogFile("./logs/frontend.log")) {
+        std::cout << "Failed to open log file, logs will be printd out to "
+                     "std::cerr only \n";
     }
 
     TensorCompiler::ONNXParser parser;
@@ -31,8 +36,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Failed to parse ONNX model\n";
         return 1;
     }
-
-    Logger::getInstance().setlogFile("./logs/frontend.log");
 
 #ifndef NDEBUG
     std::cerr << "Calling ParseGraph... \n";

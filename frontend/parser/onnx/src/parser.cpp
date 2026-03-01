@@ -12,8 +12,9 @@
 
 namespace TensorCompiler {
 
-ONNXParser::ONNXParser() {
-    model_ = std::make_unique<onnx::ModelProto>();
+ONNXParser::ONNXParser()
+    : model_(std::make_unique<onnx::ModelProto>()),
+      graph_(std::make_unique<Graph>()) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
 
@@ -251,8 +252,8 @@ const Graph& ONNXParser::ParseGraph() {
 
     for (const auto& value_info : onnx_graph.value_info()) {
         if (graph.tensors_.find(value_info.name()) == graph.tensors_.end()) {
-            graph.tensors_[value_info.name()] =
-                ConvertTensorFromValueInfo(value_info);
+            graph.tensors_.try_emplace(value_info.name(),
+                                       ConvertTensorFromValueInfo(value_info));
         }
     }
 
