@@ -129,16 +129,19 @@ jobs:
 
       - name: Run cppcheck
         run: |
-          cppcheck --enable=all --inconclusive \
-                  --suppress=missingIncludeSystem \
-                  --suppress=unusedFunction \
-                  --error-exitcode=1 --quiet \
-                  --suppress=unmatchedSuppression \
-                  --file-filter=-*onnx.pb* \
-                  -Ifrontend/parser/onnx/include \
-                  -Ifrontend/ir/include \
-                  -Ifrontend/graphviz/include \
-                  -Icommon/logger \
-                  -Ibuild-lint \
-                  -I. \
-                  frontend common flags tests
+          find frontend common flags tests \
+            -name '*.cpp' -o -name '*.hpp' \
+            ! -path '*/onnx.pb.*' \
+            ! -path '*/onnx.pb.cc' \
+            | xargs cppcheck \
+                --enable=all --inconclusive \
+                --error-exitcode=1 --quiet \
+                --suppress=missingIncludeSystem \
+                --suppress=unusedFunction \
+                --suppress=unmatchedSuppression \
+                -Ifrontend/parser/onnx/include \
+                -Ifrontend/ir/include \
+                -Ifrontend/graphviz/include \
+                -Icommon/logger \
+                -Ibuild-lint/frontend/parser/onnx/include \
+                -I.
