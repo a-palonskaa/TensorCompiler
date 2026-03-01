@@ -56,30 +56,35 @@ class Logger {
                  << "[time: " << timestamp << "] " << "[" << file << ":" << line
                  << "] " << ": " << message << "\n";
 
-        if (logFile_.is_open()) {
-            logFile_ << logEntry.str();
-            logFile_.flush();
+        if (fileStream_.is_open()) {
+            fileStream_ << logEntry.str();
+            fileStream_.flush();
         }
     }
 
-    bool setlogFile(const string& filename) {
-        if (logFile_.is_open()) {
-            logFile_.close();
+    bool setLogFile(const std::string& filename) {
+        if (fileStream_.is_open()) {
+            fileStream_.close();
         }
 
-        logFile_.open(filename, ios::app);
-        if (!logFile_.is_open()) {
-            cerr << "Error opening new log file: " << filename << endl;
+        fileStream_.open(filename, std::ios::app);
+
+        if (fileStream_.is_open()) {
+            output_ = &fileStream_;
+            return true;
+        } else {
+            output_ = &std::cerr;
+            std::cerr << "[ERROR] Cannot open log file: " << filename << "\n";
             return false;
         }
-        return true;
     }
 
    private:
     Logger() = default;
     ~Logger() {
-        if (logFile_.is_open()) logFile_.close();
+        if (fileStream_.is_open()) fileStream_.close();
     }
 
-    ofstream logFile_;
+    std::ofstream fileStream_;
+    std::ostream* output_ = &std::cerr;
 };

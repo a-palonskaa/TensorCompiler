@@ -4,5 +4,5 @@ logs/
 .vscode
 *.out
 *.dot
-*.png
 *.proto
+.DS_Store
