@@ -22,8 +22,22 @@ jobs:
       - name: Download onnx.proto
         run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto
 
-      - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ graphviz protobuf-compiler libprotobuf-dev libabsl-dev
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ graphviz protobuf-compiler libprotobuf-dev
+
+      - name: Build and install Abseil
+        run: |
+          git clone --depth 1 https://github.com/abseil/abseil-cpp.git
+          cd abseil-cpp
+          mkdir build && cd build
+          cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                -DABSL_BUILD_TESTING=OFF \
+                -DCMAKE_CXX_STANDARD=17 \
+                -DCMAKE_INSTALL_PREFIX=/usr/local \
+                ..
+          make -j$(nproc)
+          sudo make install
+          cd ../..
 
       - name: Cache CMake deps
         uses: actions/cache@v4
@@ -32,7 +46,7 @@ jobs:
           key: ${{ runner.os }}-release-${{ hashFiles('**/CMakeLists.txt', '.github/workflows/ci.yml') }}
 
       - name: Configure
-        run: cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
 
       - name: Build
         run: cmake --build build-release --parallel
@@ -50,10 +64,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download onnx.proto
-        run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto  # Скачивает в корень репо
+        run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto
 
-      - name: Install deps
+      - name: Install system deps
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ graphviz protobuf-compiler libprotobuf-dev
+
+      - name: Build and install Abseil
+        run: |
+          git clone --depth 1 https://github.com/abseil/abseil-cpp.git
+          cd abseil-cpp
+          mkdir build && cd build
+          cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                -DABSL_BUILD_TESTING=OFF \
+                -DCMAKE_CXX_STANDARD=17 \
+                -DCMAKE_INSTALL_PREFIX=/usr/local \
+                ..
+          make -j$(nproc)
+          sudo make install
+          cd ../..
 
       - name: Cache CMake deps
         uses: actions/cache@v4
@@ -62,7 +90,7 @@ jobs:
           key: ${{ runner.os }}-sanitizers-${{ hashFiles('**/CMakeLists.txt', '.github/workflows/ci.yml') }}
 
       - name: Configure
-        run: cmake -S . -B build-sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S . -B build-sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/usr/local
 
       - name: Build
         run: cmake --build build-sanitizers --parallel
@@ -72,3 +100,50 @@ jobs:
           ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ctest --test-dir build-sanitizers --output-on-failure --timeout 120
+
+  lint:
+    name: Lint (clang-format, cppcheck)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download onnx.proto
+        run: wget https://raw.githubusercontent.com/onnx/onnx/main/onnx/onnx.proto -O onnx.proto
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y clang-format cppcheck protobuf-compiler
+
+      - name: Generate onnx.pb.h for lint
+        run: |
+          mkdir -p build-lint/frontend/parser/onnx/include
+          protoc --cpp_out=build-lint/frontend/parser/onnx/include \
+                 --proto_path=. \
+                 onnx.proto
+
+      - name: Check formatting (clang-format)
+        run: |
+          find frontend common flags tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i
+          git diff --exit-code
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all --inconclusive --force \
+                   --error-exitcode=1 --quiet \
+                   --library=posix \
+                   --platform=unix64 \
+                   --suppress=missingIncludeSystem \
+                   --suppress=unusedFunction \
+                   --suppress=unmatchedSuppression \
+                   --suppress=preprocessorErrorDirective \
+                   --suppress=noValidConfiguration \
+                   --suppress=unusedStructMember \
+                   --suppress=toomanyconfigs \
+                   -Ifrontend/parser/onnx/include \
+                   -Ifrontend/ir/include \
+                   -Ifrontend/graphviz/include \
+                   -Icommon/logger \
+                   -Ibuild-lint/frontend/parser/onnx/include \
+                   -I. \
+                   frontend common flags tests

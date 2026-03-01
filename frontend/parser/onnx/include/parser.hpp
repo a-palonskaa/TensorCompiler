@@ -8,7 +8,8 @@
 #include "onnx.pb.h"
 #include "types.hpp"
 
-using TensorData = std::variant<std::vector<float>, std::vector<double>, std::vector<int32_t>, std::vector<int64_t>>;
+using TensorData = std::variant<std::vector<float>, std::vector<double>,
+                                std::vector<int32_t>, std::vector<int64_t>>;
 
 namespace TensorCompiler {
 
@@ -20,7 +21,7 @@ class ONNXParser {
     struct TensorInfo {
         std::string name;
         std::vector<int64_t> dimensions;
-        int dataType;
+        int dataType = 0;
     };
 
     struct NodeInfo {

@@ -1,38 +1,36 @@
 #pragma once
+
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#define LOG(level, message) Logger::getInstance().log(level, message, __FILE__, __LINE__)
+
+#define LOG(level, message) \
+    Logger::getInstance().log(level, message, __FILE__, __LINE__)
+
 using namespace std;
 
-enum LogLevel {
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    CRITICAL
-};
+enum LogLevel { DEBUG, INFO, WARNING, ERROR, CRITICAL };
 
-inline string levelToString(LogLevel level) {
+static string levelToString(LogLevel level) {
     switch (level) {
-    case DEBUG:
-        return "DEBUG";
-    case INFO:
-        return "INFO";
-    case WARNING:
-        return "WARNING";
-    case ERROR:
-        return "ERROR";
-    case CRITICAL:
-        return "CRITICAL";
-    default:
-        return "UNKNOWN";
+        case DEBUG:
+            return "DEBUG";
+        case INFO:
+            return "INFO";
+        case WARNING:
+            return "WARNING";
+        case ERROR:
+            return "ERROR";
+        case CRITICAL:
+            return "CRITICAL";
+        default:
+            return "UNKNOWN";
     }
 }
 
 class Logger {
-public:
+   public:
     static Logger& getInstance() {
         static Logger instance;
         return instance;
@@ -41,15 +39,22 @@ public:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    void log(LogLevel level, const string& message, const char* file, int line) {
+    void log(LogLevel level, const string& message, const char* file,
+             int line) {
         time_t now = time(0);
-        tm* timeinfo = localtime(&now);
+        tm timeinfo_buf;
+        const tm* timeinfo = localtime_r(&now, &timeinfo_buf);
+        if (!timeinfo) {
+            timeinfo_buf = tm{};
+            timeinfo = &timeinfo_buf;
+        }
         char timestamp[20];
         strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeinfo);
 
         ostringstream logEntry;
-        logEntry << "[" << levelToString(level) << "] " << "[time: " << timestamp <<
-                "] " << "[" << file << ":" << line << "] " << ": " << message << "\n";
+        logEntry << "[" << levelToString(level) << "] "
+                 << "[time: " << timestamp << "] " << "[" << file << ":" << line
+                 << "] " << ": " << message << "\n";
 
         if (logFile_.is_open()) {
             logFile_ << logEntry.str();
@@ -57,7 +62,7 @@ public:
         }
     }
 
-    bool setlogFile_(const string& filename) {
+    bool setlogFile(const string& filename) {
         if (logFile_.is_open()) {
             logFile_.close();
         }
@@ -70,7 +75,7 @@ public:
         return true;
     }
 
-private:
+   private:
     Logger() = default;
     ~Logger() {
         if (logFile_.is_open()) logFile_.close();

@@ -1,4 +1,5 @@
 #include "graphviz.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -153,11 +154,14 @@ void Graph::ToGraphViz(const std::string& filename) const {
 
     ofs << "  legend_text [\n"
         << "    label=<\n"
-        << "      <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"4\">\n"
+        << "      <table border=\"0\" cellborder=\"1\" cellspacing=\"0\" "
+           "cellpadding=\"4\">\n"
         << "        <tr><td colspan=\"2\"><b>Legend</b></td></tr>\n"
-        << "        <tr><td>Operator</td><td bgcolor=\"lightblue\"> </td></tr>\n"
+        << "        <tr><td>Operator</td><td bgcolor=\"lightblue\"> "
+           "</td></tr>\n"
         << "        <tr><td>Tensor</td><td bgcolor=\"yellow\"> </td></tr>\n"
-        << "        <tr><td>Constant tensor</td><td bgcolor=\"lightgreen\"> </td></tr>\n"
+        << "        <tr><td>Constant tensor</td><td bgcolor=\"lightgreen\"> "
+           "</td></tr>\n"
         << "        <tr><td>Unknown</td><td bgcolor=\"crimson\"> </td></tr>\n"
         << "      </table>\n"
         << "    >,\n"
@@ -166,4 +170,4 @@ void Graph::ToGraphViz(const std::string& filename) const {
 
     ofs << "}\n";
 }
-} // namespace TensorCompiler
+}  // namespace TensorCompiler
